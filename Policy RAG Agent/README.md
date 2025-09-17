@@ -6,7 +6,9 @@ A Retrieval-Augmented Generation (RAG) agent built in **n8n** that delivers grou
 
 ## 📸 Workflow Overview  
 <!-- Add your image below this line -->
-![Workflow Diagram](your-image-path-here)
+![Workflow Diagram](../Assets/policy_rag_data_ingestion.png?raw=true "Policy RAG Agent Screenshot")
+
+![Workflow Diagram](../Assets/policy_rag_main.png?raw=true "Policy RAG Agent Screenshot")
 
 ---
 
