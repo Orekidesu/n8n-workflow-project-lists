@@ -17,6 +17,13 @@ A modular, multi-agent assistant built in **n8n** that interprets both **text an
 
 ![Workflow Diagram](../Assets/ai_personal_assistant_research_agent.png?raw=true "AI Personal Assistant Screenshot")
 
+<video src="../Assets/ai_personal_assistant_bot.mp4" width="600" controls>
+  Your browser does not support the video tag.
+</video>
+
+
+
+
 ---
 
 ## 🧠 Core Architecture
