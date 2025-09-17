@@ -6,7 +6,7 @@ An automated resume screening workflow built in **n8n**, designed to evaluate ca
 
 ## 📸 Workflow Overview  
 <!-- Add your image below this line -->
-![Workflow Diagram](your-image-path-here)
+![Workflow Diagram](/repository/assets/resume_screening_system.png?raw=true "AI Resume System Screenshot")
 
 ---
 
