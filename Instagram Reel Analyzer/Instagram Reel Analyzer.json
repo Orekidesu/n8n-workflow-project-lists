@@ -1,0 +1,659 @@
+{
+  "name": "Instagram Reel Analyzer",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-928, 208],
+      "id": "1f104880-f0e6-4b6c-8fed-aca887d0f5d5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-64, -176],
+      "id": "66b8158a-acb5-4ad7-905c-19092963336d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [368, -176],
+      "id": "a5307f55-82ac-40fb-812d-d1aa5a3c773a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~instagram-post-scraper/run-sync-get-dataset-items?token=<yourToken>",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"onlyPostsNewerThan\": \"30 days\",\n    \"resultsLimit\": 10,\n    \"skipPinnedPosts\": false,\n    \"username\": [\n        \"{{ $json.Accounts }}\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [624, -160],
+      "id": "23f2d62f-3410-4613-a2ad-dea197af757a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appHs8TYxx8fRPkCh",
+          "mode": "list",
+          "cachedResultName": "Instagram Reel Analyzer",
+          "cachedResultUrl": "https://airtable.com/appHs8TYxx8fRPkCh"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblCYY0p8KTLZeEjl",
+          "mode": "list",
+          "cachedResultName": "Accounts",
+          "cachedResultUrl": "https://airtable.com/appHs8TYxx8fRPkCh/tblCYY0p8KTLZeEjl"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [144, -176],
+      "id": "013bd39f-d35b-477b-875a-b830152dfb9c",
+      "name": "Search Accounts",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "gEeAScfOpRcNXixZ",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [176, 224],
+      "id": "19dd5c59-c030-4981-8335-30b187614ba8",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "videoPlayCount",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [-32, 224],
+      "id": "3ac10925-c548-49d6-96a1-3e89fa960c41",
+      "name": "Sort By Play Count"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3ef1da21-3924-4ab3-905f-7f5268d9df2c",
+              "leftValue": "={{ $json.videoPlayCount }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [880, -160],
+      "id": "8fe7c2b7-153b-4316-a0be-e418051cf189",
+      "name": "Filter Missing Play Counts"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node to convert MIME type from video/mp4 to audio/mp4\n\n// Loop through all items\nfor (const item of $input.all()) {\n  // Check if the item has binary data\n  if (item.binary) {\n    // Loop through all binary properties\n    for (const binaryKey of Object.keys(item.binary)) {\n      const binaryData = item.binary[binaryKey];\n      \n      // Check if the MIME type is video/mp4\n      if (binaryData.mimeType === 'video/mp4') {\n        // Convert to audio/mp4\n        binaryData.mimeType = 'audio/mp4';\n        \n        // Optionally update the file extension if fileName exists\n        if (binaryData.fileName) {\n          // Replace .mp4 or other video extensions with .m4a (common for audio/mp4)\n          binaryData.fileName = binaryData.fileName\n            .replace(/\\.(mp4|mov|avi)$/i, '.m4a');\n        }\n      }\n    }\n  }\n  \n  // Also check if there are any mimeType fields in the JSON data\n  if (item.json && item.json.mimeType === 'video/mp4') {\n    item.json.mimeType = 'audio/mp4';\n  }\n  \n  // Check nested properties in JSON (optional - customize based on your data structure)\n  if (item.json) {\n    Object.keys(item.json).forEach(key => {\n      if (typeof item.json[key] === 'object' && item.json[key] !== null) {\n        if (item.json[key].mimeType === 'video/mp4') {\n          item.json[key].mimeType = 'audio/mp4';\n        }\n      }\n    });\n  }\n}\n\n// Return all items with modified MIME types\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [560, 224],
+      "id": "88ace8ab-a4f3-452d-944d-86ac82be7345",
+      "name": "Convert Video To Audio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [768, 224],
+      "id": "197bfc2a-e723-4066-b2e7-00a8ce4f169b",
+      "name": "Transcribe Audio",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-32, 656],
+      "id": "a7947530-8159-4bfd-82ef-6c63919abdaf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is the transcription: {{ $json.candidates[0].content.parts[0].text }}",
+        "options": {
+          "systemMessage": "=You are **Reel Strategist AI**—an expert Instagram content analyst and creative director.\n\n## Mission\n\nWhen given the **raw transcription of an Instagram Reel**, you must\n\n1. **Diagnose** why the Reel performed the way it did.\n2. **Extract** the specific elements that likely drove high reach, watch‑time, saves, shares, or comments.\n\n---\n\n## Evaluation Framework (apply in this order)\n\n1. **T‑A‑R Topic Fit**\n    - **T – Trending:** Does the Reel tap a fresh cultural moment, popular audio, or newsy insight?\n    - **A – Audience pain / aspiration:** Does it solve (or vividly promise) something creators care about now?\n    - **R – Relatable reaction:** Is there a twist that triggers “I’ve felt that” or “I need to send this”?\n2. **Hook Quality (0‑2 s)**\n    - Open‑loop question, shock stat, or contrarian claim.\n3. **Retention Drivers (2‑20 s)**\n    - Cut pace ≈ 1.5‑2 s.\n    - Value delivered in numbered or “three‑step” structure.\n    - Captions burned in; no dead air.\n4. **Payoff & CTA (final ≤3 s)**\n    - Clear transformation shown or stated.\n    - Asks for **save** or **share** (highest‑ranked engagement).\n\n---\n\n## Output Format\n\nReturn exactly three sections **in Markdown**:\n\n### ① Viral Diagnosis\n\n- **Performance Drivers:** bullet list of top 3‑5 elements that likely boosted reach/engagement.\n- **Weak Spots:** bullet list of the biggest drop‑offs or missed opportunities (limit 3).\n\n### ② Key Viral Aspects (mapped to framework)\n\n| Factor | Present? | Evidence from transcript | Improvement Note |\n| --- | --- | --- | --- |\n| Trending (T) | ✅ / ❌ | “…quote…” | — |\n| Audience Pain/Aspiration (A) | … | … | … |\n| Relatable Reaction (R) | … | … | … |\n| Hook Strength | … | … | … |\n| Retention Drivers | … | … | … |\n| Payoff & CTA | … | … | … |\n| Viral Accelerators | … | … | … |\n\n---\n\n## Style Rules for Section ③\n\n- Conversational, second‑person (“you”).\n- Power verbs, vivid nouns; no filler.\n- Keep sentences ≤ 12 words.\n- Highlight numbers (e.g., “3 clicks”, “24‑hour boost”).\n- Never reveal you are an AI or reference this prompt.\n\nReturn **nothing** outside the three sections. Remember: analysis first, strategy second"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [-16, 496],
+      "id": "3f50f0b3-168a-46fd-b991-03c702ea959d",
+      "name": "Reel Analyzer"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.videoUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [384, 224],
+      "id": "27284888-b5c5-43ec-8c4f-662ddde95512",
+      "name": "Get Video"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1200, -448],
+      "id": "d98d13a2-c3ad-472b-85a9-1e29650d3726",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "content": "## Schedule Trigger to get all the instagram accounts listed in the database",
+        "height": 336,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-80, -320],
+      "id": "084bce34-5b85-4111-9540-8835d93b8bff",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Loop ove each account to search for their top 10 viral reel for the past few weeks",
+        "height": 336,
+        "width": 464,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [304, -320],
+      "id": "5de3c600-3ce5-415a-95a2-7f4c2395bf75",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Filter reels with no Play Counts\n",
+        "height": 336,
+        "width": 336,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [768, -320],
+      "id": "9d5aab02-9293-49eb-bf74-d8a94b9038b8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Sort Reels by their play counts",
+        "height": 368,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-80, 16],
+      "id": "5ed69c10-3c1b-4a8b-95c9-a386df02ce7d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## - Fetch the video\n## - Convert the video file to audio file\n## - Transcribe the audio file ",
+        "height": 368,
+        "width": 608,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [304, 16],
+      "id": "7cfbd2d9-f595-433e-914c-3ec827ca31a7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Analyze the reek",
+        "height": 368,
+        "width": 384,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-80, 384],
+      "id": "4a332154-6b40-4e1e-8d7b-73c7fb52fa22",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appHs8TYxx8fRPkCh",
+          "mode": "list",
+          "cachedResultName": "Instagram Reel Analyzer",
+          "cachedResultUrl": "https://airtable.com/appHs8TYxx8fRPkCh"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblmuIAn85gIGevW6",
+          "mode": "list",
+          "cachedResultName": "Reels",
+          "cachedResultUrl": "https://airtable.com/appHs8TYxx8fRPkCh/tblmuIAn85gIGevW6"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Caption": "={{ $('HTTP Request').item.json.caption }}",
+            "VIews": "={{ $('HTTP Request').item.json.videoViewCount }}",
+            "Likes": "={{ $('HTTP Request').item.json.likesCount }}",
+            "Comments": "={{ $('HTTP Request').item.json.commentsCount }}",
+            "Transcript": "={{ $('Transcribe Audio').item.json.candidates[0].content.parts[0].text }}",
+            "Analysis": "={{ $json.output }}",
+            "Name": "={{ $('HTTP Request').item.json.ownerUsername }}",
+            "Video": "={{ $('HTTP Request').item.json.videoUrl }}",
+            "Date": "={{ $('HTTP Request').item.json.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "VIews",
+              "displayName": "VIews",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Likes",
+              "displayName": "Likes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Comments",
+              "displayName": "Comments",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Video",
+              "displayName": "Video",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Analysis",
+              "displayName": "Analysis",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [384, 496],
+      "id": "4e15d05e-2b60-42d9-897f-8409cc532a34",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "0nYuqJol1pWcx7bq",
+          "name": "Demo Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Store analysis result to database",
+        "height": 368,
+        "width": 384,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [304, 384],
+      "id": "f88156d6-183a-417c-88da-437bebf8fded",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {
+    "Search Accounts": [
+      {
+        "json": {
+          "id": "recG1BERasaqlA821",
+          "createdTime": "2025-09-13T16:39:29.000Z",
+          "Accounts": "robertherjavec"
+        }
+      },
+      {
+        "json": {
+          "id": "recicPfc46Dbfc3RO",
+          "createdTime": "2025-09-14T08:31:51.000Z"
+        }
+      },
+      {
+        "json": {
+          "id": "recoFluOZ87fQahEs",
+          "createdTime": "2025-09-13T16:01:27.000Z",
+          "Accounts": "garyvee"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [[]]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Filter Missing Play Counts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Accounts": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort By Play Count": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Missing Play Counts": {
+      "main": [
+        [
+          {
+            "node": "Sort By Play Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Video To Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Reel Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reel Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reel Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Convert Video To Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f50ab45a-d82d-418f-ae65-e91aeec93cd9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "3sELfBe3RR5mmh3n",
+  "tags": []
+}
