@@ -1,0 +1,407 @@
+{
+  "name": "Scrape Businesses",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appdKZXDyX53XdZF8",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblJpNBBE5VmiVsSW",
+          "mode": "id"
+        },
+        "triggerField": "Created",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "83782c5b-7201-4af7-b301-9620b0a77427",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "0nYuqJol1pWcx7bq",
+          "name": "Demo Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Business Type: {{ $json.fields.Business }}\nCity : {{ $json.fields.City }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# Overview Generate comprehensive lists of localized search queries for Google Maps by combining business types with city neighborhoods/subregions.  \n\n\n## Input  \n- Business type (e.g, \"Med Spa\") \n- City name (e.g., \"Ormoc City\") \n\n\n## Output Requirements \n- Format: ` {Business}+in+{subregion}` for each query \n- Include ALL neighborhoods/subregions within the specified city \n- Use proper capitalization and spelling  \n\n\n## Important - Always use \"+\" signs instead of spaces in all queries - Generate an exhaustive list covering all city subregic - Parse input from '{{ $json.fields.City }}' and `{{ $json.fields.Business }}`"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        112,
+        80
+      ],
+      "id": "47d70b5f-0fe4-47e8-9c5b-ea26fb11ec55",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"output\": [\"med+spa+in+naples\" , \"med+spa+in+ormoc+city \"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        240
+      ],
+      "id": "3c982040-4c80-46cc-b5ab-a14d5d0dd1ba",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        240
+      ],
+      "id": "6bc19fef-5953-4084-9932-076e9410809d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        464,
+        80
+      ],
+      "id": "3c94c008-1be7-42cf-9fb2-2fff304b538f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5eb8ffac-aa8e-457b-bc24-1228847dd36d",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "8c2ecab3-6d7e-4c8d-a5af-ecf72cee2fe7",
+              "name": "location",
+              "value": "={{ $('Airtable Trigger').item.json.fields.City }}",
+              "type": "string"
+            },
+            {
+              "id": "42418a03-b44a-4911-af19-82fce4ae29eb",
+              "name": "id",
+              "value": "={{ $('Airtable Trigger').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2ce90bb6-a7bd-46e9-9615-7351499608e8",
+              "name": "business",
+              "value": "={{ $('Airtable Trigger').item.json.fields.Business }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        80
+      ],
+      "id": "228edee3-3c0e-4fa6-8629-f99047d02228",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        80
+      ],
+      "id": "2aae8bac-7b72-42a3-b866-f8676110b437",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "LQ7WQCodfjBUIAXa",
+          "mode": "list",
+          "cachedResultName": "Business URLS Scraper"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Query": "={{ $json.output }}",
+            "Business": "={{ $json.business }}",
+            "id": "={{ $json.id }}",
+            "City": "={{ $json.location }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "35fbad35-2090-469b-91aa-e154dafc010e",
+      "name": "Call 'Business URLS Scraper'"
+    },
+    {
+      "parameters": {
+        "content": "## - Airtable trigger when a new entry of business type and location is added",
+        "height": 272,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -32
+      ],
+      "id": "5976df9a-945b-4977-93db-5f1b549612b9",
+      "name": "Sticky Note",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## - Generates properly formatted google maps search queries \n",
+        "height": 400,
+        "width": 768,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "c1dca937-df0b-44ce-bc1d-e5e2436f01d3",
+      "name": "Sticky Note1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## - Loop each query and pass it to the google map scraper sub workflow\n",
+        "height": 400,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -32
+      ],
+      "id": "057ab29c-107d-4990-884b-04a785f38ec5",
+      "name": "Sticky Note3",
+      "disabled": true
+    }
+  ],
+  "pinData": {
+    "Airtable Trigger": [
+      {
+        "json": {
+          "id": "recCJ0e7IASB33cHx",
+          "createdTime": "2025-09-12T06:52:20.000Z",
+          "fields": {
+            "Business": "Food",
+            "City": "Cebu City",
+            "Created": "2025-09-12T06:52:20.000Z"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'Business URLS Scraper'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Business URLS Scraper'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7da7f63d-b665-4da5-95f6-64ab2e856790",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "lAV0wepd8Ti4iIjp",
+  "tags": []
+}

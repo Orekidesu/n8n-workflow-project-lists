@@ -1,0 +1,703 @@
+{
+  "name": "Business URLS Scraper",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "Query"
+            },
+            {
+              "name": "id"
+            },
+            {
+              "name": "Business"
+            },
+            {
+              "name": "City"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        -32
+      ],
+      "id": "c82cb645-6780-457c-9204-26c647aca602",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "url": "=https://google.com/maps/search/{{ $json.Query }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "5c2588b5-a188-405b-b855-56db590fdcc4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json.data\nconst regex = /https?:\\/\\/[^\\/]+/g\n\nconst urls = data.match(regex)\n\n\nreturn urls.map(url => ({json: {url}})) || null"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -32
+      ],
+      "id": "3c5e018c-decb-40a6-8a04-19525ec6e225",
+      "name": "Get All URLs"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "92a384fc-6cde-41cf-896a-51a8bdc7c474",
+              "leftValue": "={{ $json.url }}",
+              "rightValue": "(google|gstatic|ggpht|googleusercontent|streetviewpixels|schema|facebook|apis\\.google|accounts\\.google|support\\.google|business\\.google|docs\\.google|maps\\.google|lh[1-6]\\.googleusercontent|csi\\.gstatic|tpc\\.googlesyndication)",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        -32
+      ],
+      "id": "218c3d0c-364f-46ad-832e-ef8778ac88ce",
+      "name": "Filter Unrelated URLs"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -32
+      ],
+      "id": "66780f09-067e-4276-9eeb-5def451c693a",
+      "name": "Remove Duplicates URLs"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appdKZXDyX53XdZF8",
+          "mode": "list",
+          "cachedResultName": "Businesses",
+          "cachedResultUrl": "https://airtable.com/appdKZXDyX53XdZF8"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblNkDbXjx2b8jz0g",
+          "mode": "list",
+          "cachedResultName": "Assignee",
+          "cachedResultUrl": "https://airtable.com/appdKZXDyX53XdZF8/tblNkDbXjx2b8jz0g"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Business": "={{ $('When Executed by Another Workflow').item.json.Business }}",
+            "Search Query": "={{ $('When Executed by Another Workflow').item.json.Query }}",
+            "City`": "={{ $('When Executed by Another Workflow').item.json.City }}",
+            "Website": "={{ $json.url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "City`",
+              "displayName": "City`",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Search Query",
+              "displayName": "Search Query",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2128,
+        -432
+      ],
+      "id": "d59f5334-16e6-4409-8938-ccbe6ea59870",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "0nYuqJol1pWcx7bq",
+          "name": "Demo Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1312,
+        32
+      ],
+      "id": "7ec0474f-6d1e-4e93-8c07-592520efdb68",
+      "name": "Request Webpage URL",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.data || \"\"; // fallback to empty string if undefined\n\nconst emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.(?!png|jpg|gif|jpeg)[a-zA-Z]{2,}/g;\n\n// Match all emails\nconst matches = data.match(emailRegex) || [];\n\nreturn { json: { emails: matches } };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        544
+      ],
+      "id": "a0add6d4-1e06-4e1e-9527-33bd8092d817",
+      "name": "Code in JavaScript",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=emails",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        400,
+        400
+      ],
+      "id": "4ced370e-b7b2-4169-9d0e-83a15cfd157b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        496
+      ],
+      "id": "8e0ca984-610a-4a03-b33c-0661ca840a6f",
+      "name": "Loop Emails",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "b247be93-97c6-43b4-b119-4c8c9049bcb5",
+      "name": "Loop Web URLS",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "806d8389-cba5-401b-b192-db881705fec7",
+              "leftValue": "={{ $json.emails }}",
+              "rightValue": "(google|gstatic|ggpht|schema\\.org|example\\.com|sentry\\.wixpress\\.com|sentry-next\\.wixpress\\.com|ingest\\.sentry\\.io|imli\\.com)",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        400
+      ],
+      "id": "05069451-c474-480e-8f05-7b797fc18201",
+      "name": "Email Filter"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "emails",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        592,
+        384
+      ],
+      "id": "c5032f71-6ff2-4054-8ac6-75287f56fc57",
+      "name": "Remove Duplicates Email"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appdKZXDyX53XdZF8",
+          "mode": "list",
+          "cachedResultName": "Businesses",
+          "cachedResultUrl": "https://airtable.com/appdKZXDyX53XdZF8"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblNkDbXjx2b8jz0g",
+          "mode": "list",
+          "cachedResultName": "Assignee",
+          "cachedResultUrl": "https://airtable.com/appdKZXDyX53XdZF8/tblNkDbXjx2b8jz0g"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.emails }}",
+            "Search Query": "={{ $('When Executed by Another Workflow').item.json.Query }}",
+            "Business": "={{ $('When Executed by Another Workflow').item.json.Business }}",
+            "City`": "={{ $('When Executed by Another Workflow').item.json.City }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "City`",
+              "displayName": "City`",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Search Query",
+              "displayName": "Search Query",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1008,
+        400
+      ],
+      "id": "594b833d-16fa-44ab-ae73-59621adbb686",
+      "name": "Create a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "0nYuqJol1pWcx7bq",
+          "name": "Demo Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### -  Perform http request to google map with the formatted search query",
+        "height": 384,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -192
+      ],
+      "id": "fae02503-0423-4251-809b-52bb08d81823",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### - Get all the urls in the html data\n### - Filter out unrelated links\n### - Removes duplicates and only keeps related urls",
+        "height": 384,
+        "width": 624,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -192
+      ],
+      "id": "c7a530eb-3c11-4412-808d-bd8a58e2ee1d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### - Get all the urls in the html data\n### - Filter out unrelated links\n### - Removes duplicates and only keeps related urls\n### - Loop each filtered url that redirects to their website and store the html data",
+        "height": 384,
+        "width": 624,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -192
+      ],
+      "id": "5e4dcf2d-3fe3-432c-bdb4-ccd76ea3d698",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## - Fetch all emails found on the website\n## - Removes unrelated emails and duplicates\n## - stores the email in the airtable database",
+        "height": 528,
+        "width": 1280,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "e9ac1b27-3e91-4a6f-b748-9dc243063588",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "emails"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": true
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        208,
+        400
+      ],
+      "id": "0fa7a1dc-0ae0-4b35-8ad0-12d38aef7243",
+      "name": "Aggregate"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "Query": "Food+&amp;+Beverage+in+Canal+Street+New+York",
+          "id": "recxipgUFiIcGKjC2",
+          "Business": "Food & Beverage",
+          "City": "New York City"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Get All URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All URLs": {
+      "main": [
+        [
+          {
+            "node": "Filter Unrelated URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Unrelated URLs": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates URLs": {
+      "main": [
+        [
+          {
+            "node": "Loop Web URLS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        []
+      ]
+    },
+    "Request Webpage URL": {
+      "main": [
+        [
+          {
+            "node": "Loop Web URLS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Emails": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Web URLS": {
+      "main": [
+        [
+          {
+            "node": "Loop Emails",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Request Webpage URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates Email": {
+      "main": [
+        [
+          {
+            "node": "Email Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Filter": {
+      "main": [
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5af8b35d-955f-4f40-bae1-b403669201ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "LQ7WQCodfjBUIAXa",
+  "tags": []
+}
