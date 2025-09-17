@@ -7,6 +7,11 @@ A modular, multi-agent assistant built in **n8n** that interprets both **text an
 
 ## 📸 Workflow Overview  
 <!-- Add your image below this line -->
+Watch the demo (Click the image below)!
+[![Watch the demo](../Assets/ai_personal_assistant_main_workflow.png)](https://drive.google.com/drive/u/1/folders/1V2LEcU1H-b00H31uaMcefqBxF0xR08_-)
+
+Screenshots of the Workflow: 
+
 ![Workflow Diagram](../Assets/ai_personal_assistant_main_workflow.png?raw=true "AI Personal Assistant Screenshot")
 
 ![Workflow Diagram](../Assets/ai_personal_assistant_calendar_agent.png?raw=true "AI Personal Assistant Screenshot")
@@ -17,9 +22,8 @@ A modular, multi-agent assistant built in **n8n** that interprets both **text an
 
 ![Workflow Diagram](../Assets/ai_personal_assistant_research_agent.png?raw=true "AI Personal Assistant Screenshot")
 
-<video src="../Assets/ai_personal_assistant_bot.mp4" width="600" controls>
-  Your browser does not support the video tag.
-</video>
+
+
 
 
 
