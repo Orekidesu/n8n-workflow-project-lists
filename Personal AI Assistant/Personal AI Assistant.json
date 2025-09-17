@@ -1,0 +1,802 @@
+{
+  "name": "Personal AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.message_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        688
+      ],
+      "id": "d1ad5b60-b45e-44f3-bc07-ee568dc53ef1",
+      "name": "Simple Memory Buffer"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ic2mVGw9U4Nr0pqLiZe51iRc5ZjpUMBueY96e6OOc00",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ic2mVGw9U4Nr0pqLiZe51iRc5ZjpUMBueY96e6OOc00/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ic2mVGw9U4Nr0pqLiZe51iRc5ZjpUMBueY96e6OOc00/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        688
+      ],
+      "id": "aebad611-f3fc-4327-930b-09fdbaa93e7a",
+      "name": "Contact Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oqjpI8oDyGvRDGmw",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for calendar event related actions",
+        "workflowId": {
+          "__rl": true,
+          "value": "sYmYyeAhiHkoHp9w",
+          "mode": "list",
+          "cachedResultName": "Calendar Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "=  {{ $fromAI(\"query\", \"the user's query\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        336
+      ],
+      "id": "a8f7f914-70f3-4bd8-8eba-b8edeb65c690",
+      "name": "Calendar Agent"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "My59g2K4Ixw4jWQj",
+          "mode": "list",
+          "cachedResultName": "Research Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "=  {{ $fromAI(\"query\", \"the user's query\") }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        624
+      ],
+      "id": "32f80123-bcb4-4773-89e8-cae7c26762d1",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are an AI Personal Assistant designed to perform multiple tasks based on user queries, including cases where the query contains more than one request. You have access to email, database, calendar, research, and customer support agents.\n\n## Context\n- You must accurately interpret natural language queries, including when multiple tasks are embedded in a single request.\n- Before using the email agent, always verify the contact in the database to ensure the user exists.\n- For events with attendees, validate contacts through the database unless both name and email are explicitly provided.\n- Research Agent outputs must remain unaltered.\n\n## Instructions\n1. Parse the user query carefully and identify all tasks if multiple actions are requested.\n2. Break down the query into individual tasks, assigning each to the correct tool or agent.\n3. For email and event attendee tasks, query the contact database before proceeding.\n4. For research queries, return the Research Agent’s output exactly as received.\n5. For customer support queries, use the Customer Support Agent directly.\n6. Execute tasks in logical order when dependencies exist (e.g., verify contact before sending email).\n7. Return results for all tasks in a clear, structured response.\n\n## Tools\n1. Contact Database – Access and verify all contacts.\n2. Email Agent – Compose, send, and manage emails.\n3. Calendar Agent – Create, update, delete, and manage events.\n4. Research Agent – Perform web searches and provide raw outputs with source links.\n5. Customer Support Agent – Handle customer support queries.\n\n## Examples\n- Input: \"Send an email to John about the meeting and schedule a call with Sarah tomorrow at 3 PM.\"\n- Process: \n  1. Check contact database for John → If exists, send email with Email Agent.  \n  2. Check contact database for Sarah → If exists, create event with Calendar Agent.  \n  3. Return confirmation for both tasks.  \n\n- Input: \"Find the latest AI news and send it to Emily.\"\n- Process:  \n  1. Use Research Agent → Get raw output.  \n  2. Check contact database for Emily → If exists, email results with Email Agent.  \n\n## SOP (Standard Operating Procedure)\n1. Parse the query to detect single or multiple tasks.\n2. Separate tasks into distinct subtasks and identify the correct agent for each.\n3. For subtasks involving contacts (email or event attendees):\n   - Query contact database first.\n   - If contact does not exist, request clarification or prompt for email address.\n4. Execute subtasks in dependency order:\n   - Validation → Action → Confirmation.\n5. Aggregate results into a single structured response.\n6. Do not modify research outputs in any way.\n\n## Final Notes\n- Always use the contact database before email or attendee actions.\n- For multi-task queries, handle all tasks sequentially and return combined results.\n- Never alter the Research Agent’s output, including links.\n- Today’s Date: {{ $now.format(\"DD\") }}\n- If the query is about calendar actions that involves an attendee. Include in the query input in the calendar tool the name and email of the attendee from the Contact Database\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        0
+      ],
+      "id": "3a3759c2-7588-4c9c-87a5-0365c475e5a5",
+      "name": "Oreki's AI Personal Assistant"
+    },
+    {
+      "parameters": {
+        "description": "call this tool when performing email related actions",
+        "workflowId": {
+          "__rl": true,
+          "value": "DlAc1oOXMTorvc07",
+          "mode": "list",
+          "cachedResultName": "Email Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "=  {{ $fromAI(\"query\", \"the user's query\") }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        320
+      ],
+      "id": "594ee1ac-9200-475a-928b-12f62f690a54",
+      "name": "Email Agent"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for customer support queries",
+        "workflowId": {
+          "__rl": true,
+          "value": "XDGzcFdBP7ib9jFu",
+          "mode": "list",
+          "cachedResultName": "Customer Support Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $json.sessionId }}",
+            "query": "={{ $fromAI(\"query\", \"the user's query\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        656
+      ],
+      "id": "1acce3ed-5c76-454b-8c2f-998fd21fb762",
+      "name": "Customer Support Agent"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        48
+      ],
+      "id": "11ea3ad2-de4c-4b91-91d4-8d652e38ff4b",
+      "name": "Telegram Trigger",
+      "webhookId": "8f47a332-dc92-4914-b38b-3e032c43eada",
+      "credentials": {
+        "telegramApi": {
+          "id": "W1d6wWfqURAEiMHD",
+          "name": "Oreki Personal AI Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        0
+      ],
+      "id": "aaae3620-1229-462e-a57d-9965a32805d7",
+      "name": "Send a text message",
+      "webhookId": "817e75f9-af01-4ff2-8cc2-686d6116e971",
+      "credentials": {
+        "telegramApi": {
+          "id": "W1d6wWfqURAEiMHD",
+          "name": "Oreki Personal AI Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0900bebe-c2a2-4ad8-98eb-01e797751c49",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio Input"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "720a582d-3dc8-472a-9df3-bfc37fdd574e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text Input"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        64,
+        48
+      ],
+      "id": "0bffc588-47b1-4cba-aa02-d9e9a80bc121",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "06bda26b-2dc3-4b97-84d5-0f94651199c2",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        112
+      ],
+      "id": "1c5a00ba-b071-4859-95bd-b00068fdc0b0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "127fd67d-243c-49d8-afac-239e549bcf21",
+      "name": "Get a file",
+      "webhookId": "58b9c7c6-f8a4-413b-93ed-db5c0b40ae41",
+      "credentials": {
+        "telegramApi": {
+          "id": "W1d6wWfqURAEiMHD",
+          "name": "Oreki Personal AI Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"text\": \"{{ $json.text}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -112
+      ],
+      "id": "ecd34a47-f197-4b6c-810d-fd1a568653c0",
+      "name": "Edit Fields VR"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        688
+      ],
+      "id": "531a7e40-e4b4-494c-8ebe-6300f8378cc3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "faRD95FrZo4IFZ1z",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        432,
+        -128
+      ],
+      "id": "2e0bec20-312b-40d9-bd97-f389168db550",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "faRD95FrZo4IFZ1z",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Telegram Trigger. Listens to both audio and text input",
+        "height": 368,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -144
+      ],
+      "id": "3607750d-7ce2-4e5e-9769-f1c13c5bfa5c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Transcribe audio input to get the text, and use it as query input",
+        "height": 272,
+        "width": 720,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "d4c4aff8-5282-4d6b-a6ca-8704b31f2766",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Extract text input query",
+        "height": 224,
+        "width": 720,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        48
+      ],
+      "id": "e354875f-7568-4623-aa91-59752f8fd34e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Interprets multi-part user queries and coordinates tasks across different agents",
+        "height": 272,
+        "width": 448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        944,
+        -112
+      ],
+      "id": "21452f84-fe1c-48f4-a5c5-de4a0c06482f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Other tools\n\n### - **OpenAI Chat Model**  \nHandles natural language understanding and task routing based on user queries, enabling intelligent agent orchestration.\n\n### - **Memory Buffer**  \nStores recent conversation context to help the assistant maintain continuity and respond with relevance across multi-step interactions.\n\n### - **Contact Database (Google Sheet)**  \nServes as the source of truth for user and attendee information, used for validating contacts before sending emails or scheduling events.",
+        "height": 576,
+        "width": 720,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        272
+      ],
+      "id": "6be6a7d8-7234-4327-8bfa-6f08084e3cd4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Email Agent \n- **Handles Email Related Tasks**\n- **Such as sending and getting emails**",
+        "height": 304,
+        "width": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        944,
+        160
+      ],
+      "id": "9b79bb77-dd16-498c-b58d-4cf17ec2d4c2",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Calendar Agent\n- **Handles Calendar Related Tasks**\n- **Such as Creating, Updating, Deleting, and Managing Events**",
+        "height": 304,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        160
+      ],
+      "id": "3b5dc5bb-c036-470e-826f-0102d136d85c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Customer Support Agent (RAG)\n- **Retrieves accurate, context-aware answers from a curated knowledge base using Retrieval-Augmented Generation, enabling the assistant to respond to support queries with grounded, reliable information.**",
+        "height": 320,
+        "width": 352,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        944,
+        464
+      ],
+      "id": "59c98982-f7e6-40ad-9e55-1e5a1db3da7f",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Researcher Agent\n- **Performs live web search queries and retrieves relevant information to support user tasks, ensuring fast and context-aware research results.**",
+        "height": 320,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        464
+      ],
+      "id": "9b427708-224a-4681-9fbb-9312a0614ae9",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        688
+      ],
+      "id": "7b23fff8-4141-40b3-acfa-e4e0913668e5",
+      "name": "Think"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory Buffer": {
+      "ai_memory": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Database": {
+      "ai_tool": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Support Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Oreki's AI Personal Assistant": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields VR": {
+      "main": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields VR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Oreki's AI Personal Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1bb598d1-7bcc-496d-aa07-d99a2d1b6681",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "d3x5M12pcgMd5eoJ",
+  "tags": []
+}

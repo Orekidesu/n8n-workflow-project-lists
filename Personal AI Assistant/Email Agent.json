@@ -1,0 +1,242 @@
+{
+  "name": "Email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4f1ee327-c151-492a-8589-02d43d805912",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"to\",\"the email address of the person we're going to send the email to\") }}",
+        "subject": "={{ $fromAI(\"subject\",\"the subject of the email\") }}",
+        "emailType": "text",
+        "message": "={{ $fromAI(\"email\", \"the message of the email\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        224
+      ],
+      "id": "e3e93715-3f5e-4916-b6de-72251586db4e",
+      "name": "Send a Message",
+      "webhookId": "ba290c9b-747d-4a84-8178-2e5975baa54e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jA7Q8DJSnanP0n5j",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $fromAI(\"limit\") }}",
+        "simple": false,
+        "filters": {
+          "sender": "={{ $fromAI(\"sender\", \"the name of the sender\") || 10 }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        224
+      ],
+      "id": "9a78204e-5114-4ef7-881b-f2dafeb75930",
+      "name": "Get Messages",
+      "webhookId": "0b492040-0958-402e-a1e7-cf471ef99271",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BQkgct9WKS9T1cHo",
+          "name": "carlmichael17Codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b2b7e973-503d-4202-bebb-a0f9b2043455",
+              "name": "output",
+              "value": "={{ $json.output}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        0
+      ],
+      "id": "5ef78623-2287-4248-b6e0-925e94b04789",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        48,
+        208
+      ],
+      "id": "f3369e90-9c7f-4930-a1f4-9c63a64afda8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are an email expert responsible for performing email actions based on the user’s query.\n\n## Context\n- The agent should understand natural language queries from the user.  \n- For now, only two actions are supported:  \n  1. Send a message  \n  2. Get messages  \n\n## Instructions\n1. Identify the intent of the user query (send message or get messages).  \n2. If the intent is \"send message\":  \n   - Extract recipient(s), subject, and body from the query.  \n   - Prepare the email draft for sending.  \n3. If the intent is \"get messages\":  \n   - Extract filters such as sender, subject keywords, date range, or unread status. If the limit of email's to get isn't specefied, just fetch the default limit of 10.  \n   - Return the list of matching emails.  \n4. Always confirm extracted details clearly in the response.  \n\n## Tools\n- Email API (for sending messages and retrieving inbox items).  \n\n## Examples\n- Input: \"Send an email to John saying we are meeting at 3 PM.\"  \n- Output: \"Sending email to John. Subject: (none). Body: We are meeting at 3 PM.\"  \n\n- Input: \"Get me all the emails from sara@gmail.com\"  \n- Output:  \n  Sender: Sara (sara@gmail.com)  \n  Summary: (Summary of the email)\nExample:  \n1. Sender: Sara (sara@gmail.com)  \n   Summary: \"Project update: The latest draft is ready for review...\"  \n2. Sender: Sara (sara@gmail.com)  \n   Summary: \"Reminder: Team meeting scheduled for tomorrow at 10 AM...\"  \n3. Sender: Sara (sara@gmail.com)  \n   Summary: \"Quick question about the budget approval process...\"  \n\n## SOP (Standard Operating Procedure)\n1. Parse the query to detect intent (send or get).  \n2. Extract required fields (recipient, subject, body for send; filters for get).  \n3. Generate a confirmation response with the extracted details.  \n4. Execute the requested action through the email API.  \n\n## Final Notes\n- Keep the responses clear and minimal.  \n- If required details are missing, ask the user to provide them.  \n- Stick strictly to the two supported actions: send message and get messages.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b80fce9f-db16-4aaf-a5b9-ce2e619399d5",
+      "name": "Email Agent"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 656,
+        "width": 1040
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -192
+      ],
+      "id": "3ff3abd3-86f9-40e7-87ef-46dffe7112e0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "#                                                             Email Agent                    ",
+        "height": 80,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -192
+      ],
+      "id": "950172e2-00b7-40e1-9302-77696a99455a",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "can you grab the last email from carl cmcodog10@gmail.com"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a Message": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Messages": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f3994644-4a3e-4754-8455-077cd9641b5b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "DlAc1oOXMTorvc07",
+  "tags": []
+}

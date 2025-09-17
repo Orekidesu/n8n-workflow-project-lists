@@ -1,0 +1,432 @@
+{
+  "name": "Calendar Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -32
+      ],
+      "id": "4b48eee8-83cf-49ea-9696-4900194a964c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        272
+      ],
+      "id": "4864e162-f1de-4a16-83aa-587bc2cf65e1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are a calendar assistant responsible for managing events. Your task is to perform event-related actions such as creating, retrieving, updating, and deleting events based on natural language user queries.\n\n## Context\n- Understand and interpret the user's query in natural language.\n- Create or update events according to the user's instructions.\n- If the user does not specify an event end time, default the event duration to 1 hour from the start time.\n- Always confirm event details before taking action when possible.\n\n## Instructions\n1. Interpret the user’s request clearly (create, update, retrieve, or delete).\n2. If creating an event:\n   - Use \"Create Event Tool\" when no attendees are specified.\n   - Use \"Create Event Tool with Attendee\" when attendees are specified.\n3. If updating an event:\n   - Use \"Get Events\" first to retrieve the event ID before updating.\n4. If deleting an event:\n   - Confirm the correct event before using \"Delete Event.\"\n5. Ensure all events are scheduled relative to today’s date and time: {{ $now.toFormat(\"yyyy-MM-dd HH:mm\") }}.\n\n## Tools\n1. Create Event Tool: For creating an event without attendees.  \n2. Create Event Tool with Attendee: For creating an event with one or more attendees.  \n3. Get Events: For retrieving events based on a query.  \n4. Update Events: For updating a specific event (requires event ID).  \n5. Delete Event: For deleting a specific event.  \n\n## Examples\n- Input: \"Schedule a team meeting tomorrow at 3 PM for 2 hours.\"  \n  Output: Event created on [Date] from 3 PM to 5 PM titled \"Team Meeting.\"  \n- Input: \"Add John to my meeting on Friday.\"  \n  Output: Event updated with attendee John for the specified meeting.  \n- Input: \"Cancel my 10 AM dentist appointment today.\"  \n  Output: Event deleted for today at 10 AM titled \"Dentist Appointment.\"  \n\n## SOP (Standard Operating Procedure)\n1. Parse the user request and identify intent (create, update, get, delete).  \n2. If updating or deleting, always use \"Get Events\" first to retrieve the event ID.  \n3. Select the appropriate tool based on intent.  \n4. If no end time is provided, schedule the event to last 1 hour.  \n5. Execute the action and provide the user with a confirmation message.  \n\n## Final Notes\n- Always validate time and date against the current timestamp: {{ $now.toFormat(\"yyyy-MM-dd HH:mm\") }}.  \n- Ensure clarity in confirmations so users know exactly what has been scheduled, updated, or deleted.  \n---\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -32
+      ],
+      "id": "4fff90d7-81a7-4e9a-911b-f25d091d939f",
+      "name": "Calendar Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an event in Google Calendar. Follow this format:\nYYYY-MM-DDTHH:mm:ssZ",
+        "calendar": {
+          "__rl": true,
+          "value": "carlmichael17codog@gmail.com",
+          "mode": "list",
+          "cachedResultName": "carlmichael17codog@gmail.com"
+        },
+        "start": "={{ $fromAI(\"StartTime\")}}",
+        "end": "={{ $fromAI(\"EndTime\") }}",
+        "additionalFields": {
+          "attendees": [],
+          "summary": "={{ $fromAI(\"summary\",\"the summary of the event\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        496
+      ],
+      "id": "f6f95fd6-7757-45ad-872a-67a737e9c21d",
+      "name": "Create an Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9T3BLoYEcfZdVkGj",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an event in Google Calendar with an Attendee.  Follow this format:\nYYYY-MM-DDTHH:mm:ssZ\"",
+        "calendar": {
+          "__rl": true,
+          "value": "carlmichael17codog@gmail.com",
+          "mode": "list",
+          "cachedResultName": "carlmichael17codog@gmail.com"
+        },
+        "start": "={{ $fromAI(\"StartTime\")}}",
+        "end": "={{ $fromAI(\"EndTime\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"attendee\") !== undefined ? $fromAI(\"attendee\") : null }}"
+          ],
+          "summary": "={{ $fromAI(\"summary\", \"the summary of the event\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        464
+      ],
+      "id": "7ab63e3e-f305-4d70-b3cd-ca8943b23ad1",
+      "name": "Create an Event with an Attendee",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9T3BLoYEcfZdVkGj",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "call this tool to convert time",
+        "jsCode": "const inputData = $input.all()[0].json;\n\nfunction convertManilaToNewYorkEquivalent(dateTimeInput) {\n  let dateStr = dateTimeInput;\n\n  if (typeof dateTimeInput === 'string') {\n    if (dateTimeInput.includes(':') && dateTimeInput.split(':').length === 2) {\n      dateStr = dateTimeInput + ':00';\n    }\n  } else {\n    const now = new Date();\n    const year = now.getFullYear();\n    const month = String(now.getMonth() + 1).padStart(2, '0');\n    const day = String(now.getDate()).padStart(2, '0');\n    const hours = String(now.getHours()).padStart(2, '0');\n    const minutes = String(now.getMinutes()).padStart(2, '0');\n    dateStr = `${year}-${month}-${day}T${hours}:${minutes}:00`;\n  }\n\n  // Treat input as Manila time (UTC+8)\n  const manilaTime = new Date(dateStr);\n\n  // Convert to New York equivalent by subtracting 12 hours\n  const newYorkEquivalent = new Date(manilaTime.getTime() - (12 * 60 * 60 * 1000));\n\n  // Always return ISO 8601 UTC format\n  return newYorkEquivalent.toISOString().replace(/\\.\\d{3}Z$/, 'Z');\n}\n\ntry {\n  let result;\n\n  if (inputData.datetime || inputData.date || inputData.time) {\n    const inputDateTime = inputData.datetime || inputData.date || inputData.time;\n    result = convertManilaToNewYorkEquivalent(inputDateTime);\n  } else {\n    result = convertManilaToNewYorkEquivalent(new Date());\n  }\n\n  return result;\n\n} catch (error) {\n  return `Error: ${error.message}`;\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        480
+      ],
+      "id": "388c08a6-d61c-4593-90a1-25ea11fdf104",
+      "name": "Code Tool",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "carlmichael17codog@gmail.com",
+          "mode": "list",
+          "cachedResultName": "carlmichael17codog@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        496
+      ],
+      "id": "c161f508-56a1-4c48-9de6-d525572c88f7",
+      "name": "Get Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9T3BLoYEcfZdVkGj",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "carlmichael17codog@gmail.com",
+          "mode": "list",
+          "cachedResultName": "carlmichael17codog@gmail.com"
+        },
+        "eventId": "={{ $fromAI('Event_ID', \"the id of the event to update\") }}",
+        "updateFields": {
+          "end": "={{ $fromAI(\"EndTime\") }}",
+          "start": "={{ $fromAI(\"StartTime\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        480
+      ],
+      "id": "cdb99146-6a61-47ec-8fa4-156c8e8554fb",
+      "name": "Update an Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9T3BLoYEcfZdVkGj",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3864bdde-4c68-4beb-b6a3-29736a2c5c45",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -48
+      ],
+      "id": "86bc330c-ce44-4f62-8bf0-74b894c89f74",
+      "name": "Success"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3864bdde-4c68-4beb-b6a3-29736a2c5c45",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        112
+      ],
+      "id": "254c901e-0788-4f9f-85f1-9de115d39811",
+      "name": "Error"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "carlmichael17codog@gmail.com",
+          "mode": "list",
+          "cachedResultName": "carlmichael17codog@gmail.com"
+        },
+        "eventId": "={{ $fromAI('Event_ID', \"the id of the event to be deleted\") }}",
+        "options": {
+          "sendUpdates": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        464
+      ],
+      "id": "5064fef5-b9b2-4b34-9edb-a6d64cd2e53a",
+      "name": "Delete Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9T3BLoYEcfZdVkGj",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 880,
+        "width": 1392
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -224
+      ],
+      "id": "b3a442fd-2274-4ec3-a326-5cccecb52998",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Calendar Agent",
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "3ba653fb-fd93-4337-9aea-c6a48cf4b2dc",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "delete the prayer meeting this friday"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an Event with an Attendee": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "594e6f37-1820-42b6-a8cd-ee1868fc7a69",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "sYmYyeAhiHkoHp9w",
+  "tags": []
+}

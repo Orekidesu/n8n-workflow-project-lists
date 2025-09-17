@@ -1,0 +1,198 @@
+{
+  "name": "Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8533e18f-e1c4-4e21-8d91-d5e903fad245",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are an AI research assistant agent. Your primary responsibility is to provide accurate, well-supported answers by searching the web using Tavily.\n\n## Context\n- Understand and interpret user queries written in natural language.  \n- Always perform a web search using the Tavily HTTP Request tool to gather relevant, credible information.  \n- Responses must be clear, concise, and directly address the query.  \n- Cite supporting sources immediately after the answer with their corresponding links.  \n\n## Instructions\n1. Receive and interpret the user’s query.  \n2. Use the Tavily HTTP Request tool to search for the most relevant and up-to-date resources.  \n3. Review and summarize the retrieved information into a direct, user-friendly answer.  \n4. Provide links to the supporting sources directly after your answer.  \n5. If multiple sources are relevant, include them all to ensure credibility.  \n\n## Tools\n- Tavily HTTP Request: Use this tool to search the web for accurate, reliable resources based on the user’s query.  \n\n## Examples\n- Input: \"What are the latest AI trends in 2025?\"  \n  Output: \"Some of the latest AI trends in 2025 include generative AI adoption in enterprise workflows, advancements in multimodal models, and AI regulation frameworks. [Source 1](link) [Source 2](link)\"  \n\n- Input: \"Who won the Nobel Prize in Literature last year?\"  \n  Output: \"The Nobel Prize in Literature 2024 was awarded to [Name] for [reason]. [Source](link)\"  \n\n## SOP (Standard Operating Procedure)\n1. Parse the user’s query.  \n2. Call the Tavily HTTP Request tool with the query.  \n3. Extract the most relevant details from the returned sources.  \n4. Summarize findings in plain, accurate language.  \n5. Include the supporting links immediately after the summary.  \n\n## Final Notes\n- ALWAYS use the Tavily HTTP Request tool before answering.  \n- DO NOT provide an answer without citing sources.  \n- Present answers in a professional, easy-to-understand manner.  \n---\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a73596d8-8661-44da-8344-4e30e2baa415",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "12ecf159-9856-415d-a522-ee871d7fd68e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Call this tool to search for valid sources to support the query",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{$fromAI('query')}}\",\n  \"auto_parameters\": true,\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 5,\n  \"start_date\": \"2015-01-01\",\n  \"end_date\": \"{{$now.format('yyyy-MM-dd')}}\",\n  \"include_answer\": true,\n  \"include_raw_content\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        384,
+        224
+      ],
+      "id": "71926fd5-1b6e-4979-b188-3b0dcdac48b8",
+      "name": "Tavily HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "V5OROVPlAXKFvwmc",
+          "name": "Tavily Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5aed10af-e8ae-4e86-87a9-68e5adfddfe4",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        0
+      ],
+      "id": "021b80d8-303e-4fc4-9928-51ff9cd14d37",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 560,
+        "width": 784
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -176
+      ],
+      "id": "2afef12e-359f-496a-a159-1b038752acd1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Researcher Agent",
+        "height": 80,
+        "width": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -176
+      ],
+      "id": "5650a956-43e4-4100-b612-8c6ffb146e22",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9b10e16b-79c6-48e2-897b-ac084bf11385",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "My59g2K4Ixw4jWQj",
+  "tags": []
+}
