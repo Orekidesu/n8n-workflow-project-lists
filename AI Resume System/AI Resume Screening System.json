@@ -1,0 +1,1012 @@
+{
+  "name": "AI Resume Screening System",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Application Form",
+        "formDescription": "Please Provide the following Information",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "Enter your Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "email",
+              "fieldType": "email",
+              "placeholder": "make sure the email is the contact email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf,.docx",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Submit",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thank you for submitting."
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        32
+      ],
+      "id": "44d03555-ac4e-4c6d-96ab-05f235a348c4",
+      "name": "On form submission",
+      "webhookId": "3981ffe6-040a-417a-afb4-34b47d48345b"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "=Resume",
+        "name": "={{ $json[\"Full Name\"] }}-Resume",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1CxwLZhPl40pDmZVBJJ1IPlwYWVocd_Lk",
+          "mode": "list",
+          "cachedResultName": "Sample Resume",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1CxwLZhPl40pDmZVBJJ1IPlwYWVocd_Lk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        32
+      ],
+      "id": "4b1bd93e-4157-4d0b-af2a-cbd8fbdc2f58",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "=application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c30d15b9-7152-4d18-9bf8-f64650ca36bd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF File"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6c588166-75b1-4727-9a4c-668390cd4314",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Docx"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        432,
+        32
+      ],
+      "id": "4a1d7240-b5e8-4d51-88e3-4e01b6157ac1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        688,
+        -32
+      ],
+      "id": "c4d66e55-dd88-42ab-9e59-7109d29cfc7d",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/drive/v2/files/{{ $('Upload file').item.json.id }}/copy?convert=true",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        208
+      ],
+      "id": "ed2434a6-d019-48c6-a8be-b2a39b4f13bb",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1rHDFthFqMadjtqN3ps3hlspaxvNhVFbS",
+          "mode": "list",
+          "cachedResultName": "Job Title.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1rHDFthFqMadjtqN3ps3hlspaxvNhVFbS/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1504,
+        176
+      ],
+      "id": "8da99543-c8e0-4d10-b27e-0233772c900b",
+      "name": "Download Job Description",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        176
+      ],
+      "id": "a7ebccf2-a4d5-4e17-a6ee-5cc9347c06b5",
+      "name": "Extract Job Description"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        224
+      ],
+      "id": "9d0fdbb9-77e6-4ccb-88d0-da7240af05d1",
+      "name": "Extract Converted Doc FIle"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -48
+      ],
+      "id": "509323c3-85d1-476e-92cc-88924ba8342d",
+      "name": "Extract PDF File"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        400
+      ],
+      "id": "dd6247d2-9aae-416b-a152-8af6f4d062ba",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Applicant Resume Details:{{ $('Standardized Resume Info').item.json.text }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview\n\nYou are an expert technical recruiter. You have been given 2 inputs; the job description, and the candidate's resume details. Your Job is to analze the resume in relation to the job description and provide a detailed screening report.\n\n\n## Output\n\nYour output should follow this exact format:\n\nCandidate Strengths:  \nList the top strengths or relevant qualifications the candidate brings to the table. Be specific.\n\nCandidate Weaknesses:\nList areas where the candidate is lacking or mismatched based on the job description.\n\nRisk Factor:\n- Assign a risk score (Low / Medium / High)  \n- Explain the worst-case scenario if this candidate is hired.\n\nReward Factor: \n- Assign a reward score (Low / Medium / High)  \n- Describe the best-case scenario — what value could this candidate unlock?  \n- Does the candidate appear to be a short-term or long-term fit?\n\nOverall Fit Rating (0–10):  \nAssign a number between 0 (terrible match) and 10 (perfect match). Do not give decimals.\n\nJustification for Rating:\nExplain clearly why this candidate received that score. Reference specific resume content and how it aligns or doesn't with the job description.\n\n## Job Description\n{{ $json.text }}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1872,
+        160
+      ],
+      "id": "fb5f23d5-9492-4f80-a77c-50d07474a79b",
+      "name": "Recruiter Agent"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        208
+      ],
+      "id": "e8e58b64-e865-48b2-bc84-dd4df315ddfd",
+      "name": "Download  Applicant Resume",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"name\": \"resume_screening_evaluation\",\n  \"description\": \"Analyzes a candidate's resume against a job description and outputs strengths, weaknesses, risk/reward assessment, and an overall fit score.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"candidate_strengths\": {\n      \"type\": \"array\",\n      \"description\": \"A list of specific strengths or qualifications that match the job description.\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"candidate_weaknesses\": {\n      \"type\": \"array\",\n      \"description\": \"A list of areas where the candidate falls short or lacks alignment with the job requirements.\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"risk_factor\": {\n      \"type\": \"object\",\n      \"description\": \"An evaluation of the potential risks of hiring this candidate.\",\n      \"properties\": {\n        \"score\": {\n          \"type\": \"string\",\n          \"enum\": [\"Low\", \"Medium\", \"High\"],\n          \"description\": \"The risk level of hiring this candidate.\"\n        },\n        \"explanation\": {\n          \"type\": \"string\",\n          \"description\": \"A brief explanation of the worst-case scenario if the candidate is hired.\"\n        }\n      },\n      \"required\": [\"score\", \"explanation\"]\n    },\n    \"reward_factor\": {\n      \"type\": \"object\",\n      \"description\": \"An evaluation of the potential upside of hiring this candidate.\",\n      \"properties\": {\n        \"score\": {\n          \"type\": \"string\",\n          \"enum\": [\"Low\", \"Medium\", \"High\"],\n          \"description\": \"The reward level of hiring this candidate.\"\n        },\n        \"explanation\": {\n          \"type\": \"string\",\n          \"description\": \"A description of the best-case scenario and whether the candidate is a short-term or long-term fit.\"\n        }\n      },\n      \"required\": [\"score\", \"explanation\"]\n    },\n    \"overall_fit_rating\": {\n      \"type\": \"integer\",\n      \"description\": \"A rating from 0 to 10 indicating how well the candidate matches the job description.\",\n      \"minimum\": 0,\n      \"maximum\": 10\n    },\n    \"justification_for_rating\": {\n      \"type\": \"string\",\n      \"description\": \"A summary explaining why the candidate received the specific fit rating, referencing resume and job description alignment.\"\n    }\n  },\n  \"required\": [\n    \"candidate_strengths\",\n    \"candidate_weaknesses\",\n    \"risk_factor\",\n    \"reward_factor\",\n    \"overall_fit_rating\",\n    \"justification_for_rating\"\n  ]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2048,
+        368
+      ],
+      "id": "cfb6e625-ec80-437f-b986-de416eb62764",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "text": "=Applicant Info: {{ $('Standardized Resume Info').item.json.text }}\n\nJob Description: {{ $('Extract Job Description').item.json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "First Name",
+              "description": "The first name of the Applicant",
+              "required": true
+            },
+            {
+              "name": "Last Name",
+              "description": "The last name of the candidate",
+              "required": true
+            },
+            {
+              "name": "Email",
+              "description": "The email of the candidate",
+              "required": true
+            },
+            {
+              "name": "Job Title",
+              "description": "The title of the job description"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        160
+      ],
+      "id": "0526279f-b9e9-481a-bc82-078bb0de7930",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ba1441c-d435-45e7-ae5d-34e2b06c8388",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        48
+      ],
+      "id": "e3526b24-bf4f-4710-9d96-9c5f2db1851e",
+      "name": "Standardized Resume Info"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        352
+      ],
+      "id": "1036649b-f8e5-4142-a0f1-01d71e02e90c",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1623da36-9510-40a8-9bfd-5d64873f68f1",
+              "leftValue": "={{ $('Recruiter Agent').item.json.output.overall_fit_rating }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        736
+      ],
+      "id": "e85ab96c-42b6-4634-b3a4-766b0db52c22",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Information Extractor').item.json.output.Email }}",
+        "subject": "=You've Advanced - {{ $('Information Extractor').item.json.output['Job Title'] }} Application Update",
+        "emailType": "text",
+        "message": "=Hi {{ $('Information Extractor').item.json.output.Name }}\n\nThank you for applying for the [Job Title] position at Oreki's Web Solutions. After reviewing your resume and qualifications, we're pleased to inform you that you've passed the initial screening process.\n\nWe'll be in touch shortly with the next steps, which may include a short assessment or an interview. In the meantime, feel free to reply if you have any questions.\n\n\nBest regards, \nOreki's Web Solutions",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        640
+      ],
+      "id": "d9e0b602-339e-4137-a75a-ea4bdc2fffd8",
+      "name": "Passed the screening message",
+      "webhookId": "b0c3bba0-c315-4b8c-911e-b65c2a2540f8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jA7Q8DJSnanP0n5j",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.output.Email }}",
+        "subject": "={{ $json.output['Job Title'] }} Application - Screening Outcome",
+        "emailType": "text",
+        "message": "=Hi {{ $json.output.Name }},\n\nThank you for your interest in the {{ $('Information Extractor').item.json.output['Job Title'] }} role at Oreki's Web Solution. We appreciate the time you took to apply and share your background with us.\n\nAfter careful consideration, we regret to inform you that your application did not pass our initial screening process. This decision was based on alignment with the specific requirements for this role.\n\nWe encourage you to apply for future opportunities that match your skills and experience. Wishing you all the best in your job search.\n\n\nBest regards, \nOreki's Web Solutions",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        896
+      ],
+      "id": "9239a2c2-c68f-4b14-929f-9b88d5f5ab48",
+      "name": "Failed in the screening message",
+      "webhookId": "99b2a6b4-c47a-4a9a-9137-a8694f761bf4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jA7Q8DJSnanP0n5j",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7874650588",
+        "text": "=A new applicant has been added to the waiting list.\n\nName: {{ $('Information Extractor').item.json.output['First Name'] }} {{ $('Information Extractor').item.json.output['Last Name'] }} \n\nCheck it out here : https://docs.google.com/spreadsheets/d/1afbbGa5lLS8DGBVwsL2RiTj1dPHm74WHsC-fk9bQGLI/edit?gid=0#gid=0",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        640
+      ],
+      "id": "64107814-a715-4172-aa4c-8e7bbd6120e5",
+      "name": "Send a text message",
+      "webhookId": "3ea557a2-1823-45a9-af42-c51acd01eaef",
+      "credentials": {
+        "telegramApi": {
+          "id": "2zdvGlIuf1DbqHwc",
+          "name": "Screening Agent Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# PROCESS THE SUBMITTED FILE FOR TEXT EXTRACTION",
+        "height": 704,
+        "width": 1504
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -176
+      ],
+      "id": "0e81c17f-96af-4542-8ae6-67b8a6ab0c18",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# RESUME ANALYSIS",
+        "height": 704,
+        "width": 720,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        -176
+      ],
+      "id": "386911ea-7d6f-40f2-b9c5-6be27105ec1c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# EMAIL CANDIDATES AND DATABASE \n",
+        "height": 624,
+        "width": 752,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        528
+      ],
+      "id": "57267467-283b-4ba2-831f-a267e9d96c71",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## EXTRACT NECESSARY INFORMATION TO STORE IN DATABASE",
+        "height": 720,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        -176
+      ],
+      "id": "32f3ddd8-196a-482e-9f52-48deb07b3542",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## NOTIFY IN TELEGRAM",
+        "height": 416,
+        "width": 272,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        528
+      ],
+      "id": "0ea59a96-3de6-4605-91cd-279d17313c81",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1afbbGa5lLS8DGBVwsL2RiTj1dPHm74WHsC-fk9bQGLI",
+          "mode": "list",
+          "cachedResultName": "Applicant Passed Laravel Developer Role",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1afbbGa5lLS8DGBVwsL2RiTj1dPHm74WHsC-fk9bQGLI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1afbbGa5lLS8DGBVwsL2RiTj1dPHm74WHsC-fk9bQGLI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.format('yyyy-MM-dd') }}",
+            "Resume": "={{ $('Upload file').item.json.webViewLink }}",
+            "First Name": "={{ $('Information Extractor').item.json.output['First Name'] }}",
+            "Last Name": "={{ $('Information Extractor').item.json.output['Last Name'] }}",
+            "Email": "={{ $('Information Extractor').item.json.output.Email }}",
+            "Strengths": "={{ $('Recruiter Agent').item.json.output.candidate_strengths.join(\"\\n\\n\") }}",
+            "Weaknesses": "={{ $('Recruiter Agent').item.json.output.candidate_weaknesses.join(\"\\n\\n\") }}",
+            "Risk Factor": "={{ $('Recruiter Agent').item.json.output.risk_factor.score }}\n\n{{ $('Recruiter Agent').item.json.output.risk_factor.explanation }}",
+            "Reward Factor": "={{ $('Recruiter Agent').item.json.output.reward_factor.score }}\n\n{{ $('Recruiter Agent').item.json.output.reward_factor.explanation }}",
+            "Overall Fit": "={{ $('Recruiter Agent').item.json.output.overall_fit_rating }}",
+            "Justification": "={{ $('Recruiter Agent').item.json.output.justification_for_rating }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume",
+              "displayName": "Resume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Strengths",
+              "displayName": "Strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weaknesses",
+              "displayName": "Weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Risk Factor",
+              "displayName": "Risk Factor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reward Factor",
+              "displayName": "Reward Factor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Overall Fit",
+              "displayName": "Overall Fit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Justification",
+              "displayName": "Justification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        304,
+        640
+      ],
+      "id": "2cec7578-8065-4154-903c-a89d48609930",
+      "name": "Add passed candidates",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oqjpI8oDyGvRDGmw",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Download  Applicant Resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Job Description": {
+      "main": [
+        [
+          {
+            "node": "Extract Job Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Job Description": {
+      "main": [
+        [
+          {
+            "node": "Recruiter Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Converted Doc FIle": {
+      "main": [
+        [
+          {
+            "node": "Standardized Resume Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Recruiter Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF File": {
+      "main": [
+        [
+          {
+            "node": "Standardized Resume Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download  Applicant Resume": {
+      "main": [
+        [
+          {
+            "node": "Extract Converted Doc FIle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Recruiter Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recruiter Agent": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Standardized Resume Info": {
+      "main": [
+        [
+          {
+            "node": "Download Job Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Add passed candidates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failed in the screening message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Passed the screening message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add passed candidates": {
+      "main": [
+        [
+          {
+            "node": "Passed the screening message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "410c8d36-b8f6-44f4-9efd-01e689457df8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "WCntefvt8oDLTyjO",
+  "tags": []
+}
