@@ -46,6 +46,3 @@ Big thanks to **Nate** for sparking many of these ideas and pushing me to think 
 
 If you’re building AI workflows, exploring automation, or just curious about n8n—feel free to reach out, fork a workflow, or suggest improvements. Collaboration and learning are what this repo is all about.
 
----
-
-Would you like help drafting the README template for each folder next? I can give you a reusable structure with sections for logic, inputs, outputs, and diagrams.
