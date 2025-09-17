@@ -61,5 +61,5 @@ An automated workflow built in **n8n** that generates Google Maps search queries
 ---
 
 > Built as part of my journey to become an AI automation specialist.  
-> More workflows coming soon—huge thanks to Nate for sparking these ideas and pushing me to think modular.
+> More workflows coming soon!
 
