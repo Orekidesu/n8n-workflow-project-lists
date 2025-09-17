@@ -1,0 +1,926 @@
+{
+  "name": "MoF Policy RAG Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -544,
+        544
+      ],
+      "id": "c97a30dd-13da-4624-a23d-486bd0b4db64",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        544
+      ],
+      "id": "80b8999b-a195-4599-8b81-2b7f430c7068",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        560
+      ],
+      "id": "bf90637e-2e50-4c3b-a836-fdba2912e829",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BF3uc6E3Vsqrb5H2",
+          "name": "RAG System"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        2352
+      ],
+      "id": "81e4beba-38bf-4384-a83b-475a1ec8c499",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "name": "file_id",
+                "value": "={{ $('Code in JavaScript').item.json.fileId }}"
+              },
+              {
+                "name": "file_name",
+                "value": "={{ $('Code in JavaScript').item.json.name }}"
+              },
+              {
+                "name": "file_size",
+                "value": "={{ $('Code in JavaScript').item.json.fileSize }}"
+              },
+              {
+                "name": "processed_at",
+                "value": "={{ $('Code in JavaScript').item.json.processedAt }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        736
+      ],
+      "id": "342e315a-4b7f-4a70-abfd-9ab355fdd6e7",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        864
+      ],
+      "id": "e8cdc772-1ffb-4bcd-b755-48cbd26c4a35",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to access the database.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        2144
+      ],
+      "id": "20493473-ddcf-4913-bafc-12f96d346497",
+      "name": "Knowledge Base",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BF3uc6E3Vsqrb5H2",
+          "name": "RAG System"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        736
+      ],
+      "id": "cee1f848-7223-4736-9716-57caae98b574",
+      "name": "text-embedding-004",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Use file metadata for duplicate detection\nfor (const item of $input.all()) {\n  const fileName = item.binary.data.fileName;\n  const fileData = item.binary.data.data;\n  \n  // Create a unique identifier from filename and size\n  const fileSize = Buffer.isBuffer(fileData) ? fileData.length : \n    Buffer.from(fileData, 'binary').length;\n  \n  // Simple identifier combining name and size\n  const fileId = `${fileName}_${fileSize}`;\n  \n  item.json.fileId = fileId;\n  item.json.fileName = fileName;\n  item.json.fileSize = fileSize;\n  item.json.processedAt = new Date().toISOString();\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        544
+      ],
+      "id": "9eb76ac3-ace5-4b59-98b4-e02bfdbdbf5e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1e7bcWF1x4ThNxVXre0Rr0i6bRdWq9jqK",
+          "mode": "list",
+          "cachedResultName": "Rag Files",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1e7bcWF1x4ThNxVXre0Rr0i6bRdWq9jqK"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        752
+      ],
+      "id": "72461e8c-3cb8-48a4-a1e1-32ec74f68d35",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        544
+      ],
+      "id": "29a7ee37-9d4e-4041-ac22-ba6b67c772ac",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1184,
+        1920
+      ],
+      "id": "400dd045-7d1f-478a-b770-c1a98df95cbc",
+      "name": "Send a text message",
+      "webhookId": "09b986ce-3f8c-41ce-90ce-1689cfe378e6",
+      "credentials": {
+        "telegramApi": {
+          "id": "x2lmm5h3xbSD9WnK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        2096
+      ],
+      "id": "109a20d4-d352-4c40-99dc-290aa7054e0c",
+      "name": "gemini-2.5-flash",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.message_id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        2176
+      ],
+      "id": "68303ce4-9903-46c2-a07f-55d57110d309",
+      "name": "Memory",
+      "credentials": {
+        "postgres": {
+          "id": "DpfKU2fl9uUY6TzZ",
+          "name": "RAG System Memory"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        1984
+      ],
+      "id": "4203ab3d-67ab-4fce-bb46-4819cdbba3e3",
+      "name": "Telegram Trigger",
+      "webhookId": "f1ae3523-9b72-418f-90fb-152b0f0d6a76",
+      "credentials": {
+        "telegramApi": {
+          "id": "x2lmm5h3xbSD9WnK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "89cec14c-ec04-4efc-a75d-6e400afa0731",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "a4420c10-46c8-4c95-bf6f-496ac65e1a07"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -208,
+        2000
+      ],
+      "id": "d8393840-4667-41e1-b3f3-d7f20dd39e21",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        1888
+      ],
+      "id": "1dd18839-48b5-4e85-b072-bb1ce29b2cc4",
+      "name": "Get a file",
+      "webhookId": "7107e5bf-e741-4c38-be0c-0caca7540c30",
+      "credentials": {
+        "telegramApi": {
+          "id": "x2lmm5h3xbSD9WnK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83b33322-c907-404f-966a-1c41f3dd7dd2",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        2048
+      ],
+      "id": "88765561-6e40-4147-a6f8-8184afb52f63",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        192,
+        1856
+      ],
+      "id": "9edd0cf9-2ef9-4524-ad79-b8a5b3396634",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FCueVwq1thZXfmbB",
+          "name": "demo_key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"text\": \"{{ $json.content.parts[0].text }}\"\n  \n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        1856
+      ],
+      "id": "d3952fda-9c3b-415a-b887-4e0ac7fb8a5c",
+      "name": "Edit Field VR"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1e7bcWF1x4ThNxVXre0Rr0i6bRdWq9jqK",
+            "mode": "list",
+            "cachedResultName": "Rag Files",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1e7bcWF1x4ThNxVXre0Rr0i6bRdWq9jqK"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -752,
+        544
+      ],
+      "id": "807e3ca2-c5e6-44fd-a913-e0c9290de08a",
+      "name": "Fetch the Files",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5q2nD7bhYXwVrCeF",
+          "name": "carlmichael17codog@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Click trigger for fresh start for fetching file\n## Google Drive trigger when new file is added to the folder",
+        "height": 656,
+        "width": 704
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        352
+      ],
+      "id": "a2539837-df28-4413-a226-4e3e69d70785",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Code node for adding extra meta tags for each file",
+        "height": 656,
+        "width": 256,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        352
+      ],
+      "id": "107656a5-e1b8-43d7-aa84-e32e76dfc7a7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Loop each file and store in vector database",
+        "height": 656,
+        "width": 640,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        352
+      ],
+      "id": "64e1721c-439d-48ce-9e69-83a0546ad3d6",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Telegram Input trigger for user queries (accepts both audio and text input)\n\n## **For audio input, uses an AI to transcribe audio file and convert it to text**",
+        "height": 864,
+        "width": 1104,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        1648
+      ],
+      "id": "6027d326-1682-46f5-b105-4c0c3521dfc4",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# The agent delivers concise, policy-cited answers to user queries by retrieving authoritative information from the Knowledge Base or memory, without follow-up questions or speculation.",
+        "height": 864,
+        "width": 1104,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        592,
+        1648
+      ],
+      "id": "4d0df6d8-18cf-4499-906a-d0841dd9ef54",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are a Retrieval-Augmented Generation (RAG) expert AI agent designed to answer user queries with high accuracy by retrieving information from authoritative sources within the Knowledge Base (KB).  \n\n## Context  \n- Your primary responsibility is to provide factually correct, concise, and well-sourced answers.  \n- All answers must be derived from the Knowledge Base, with explicit citation of MoF policies where relevant.  \n- You must avoid ambiguity, speculation, and unnecessary elaboration.  \n- You also have access to a memory tool containing past interactions. If a user query matches a previously answered question, you must retrieve the answer from memory instead of re-querying the Knowledge Base.  \n\n## Instructions  \n1. First, check the memory tool to determine if the current query has already been answered in a past interaction.  \n   - If yes, return the stored answer directly from memory for faster delivery.  \n   - If no, proceed to query the Knowledge Base.  \n2. Always query the Knowledge Base as many times as needed to ensure accuracy and completeness when no memory match exists.  \n3. Do not ask the user follow-up or clarifying questions. Answer directly, even if the query is ambiguous.  \n4. Provide responses in a concise, clear format that always ends with a **Citation** line.  \n5. Explicitly cite the Knowledge Base source(s) using the format:  \n   - Citation: [MoF Policy ###: Policy Title]  \n6. If the answer cannot be determined from the Knowledge Base, state:  \n   \"The information required to answer this question is not available in the provided knowledge bases.\"  \n\n## Tools  \n- Knowledge Base (KB) containing MoF policies and regulations  \n- Memory tool containing past interactions  \n\n## Examples  \n- Input: \"What are the requirements for Zone A?\"  \n- Output:  \n  \"Yes—Zone A requires submission ≥3 days before activation, allows up to 100 participants, and the nonprofit status and non-sensitive data comply with Zone A restrictions.  \n\n  Citation: [MoF Policy 001: Permit Eligibility by Zone]\"  \n\n- Input: \"Can I register an event in Zone C with 500 participants?\"  \n- Output:  \n  \"No—Zone C permits a maximum of 300 participants, therefore 500 participants exceeds the allowed limit.  \n\n  Citation: [MoF Policy 004: Zone Capacity Regulations]\"  \n\n- Input: \"What are the rules for Zone X?\"  \n- Output:  \n  \"The information required to answer this question is not available in the provided knowledge bases.\"  \n\n## SOP (Standard Operating Procedure)  \n1. Receive the user query.  \n2. Check the memory tool for a matching past interaction.  \n   - If a match exists, return the stored answer directly.  \n   - If no match exists, proceed to Step 3.  \n3. Search the Knowledge Base thoroughly for relevant MoF policies.  \n4. Retrieve authoritative information from the correct policy.  \n5. Construct a concise factual response in the approved output format.  \n6. Always end the answer with the **Citation line** referencing the specific MoF policy.  \n7. If no answer is available, return the fallback statement.  \n\n## Final Notes  \n- Always prioritize factual accuracy and proper MoF policy citation.  \n- Never speculate or provide answers unsupported by the Knowledge Base.  \n- Always follow the exact output format for consistency.  \n- Use memory first for efficiency; use KB only when memory does not contain the answer.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        1904
+      ],
+      "id": "c489aa4c-c88d-4f51-b227-3ba8c17cb76a",
+      "name": "RAG Agent"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 768,
+        "width": 2256,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        240
+      ],
+      "id": "746e0aac-6419-4145-9e6e-e3514801ea52",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Data Ingestion To Vector Database",
+        "height": 80,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        240
+      ],
+      "id": "0fb32011-6cce-4af9-8cea-e7ab734086ab",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1024,
+        "width": 2368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        1488
+      ],
+      "id": "4eb0f592-84e4-4d5e-b6e4-35d29797d1cd",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# RAG Pipeline",
+        "height": 80,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        1488
+      ],
+      "id": "c1053a28-73b7-41a2-9c4f-61da447ef5a1",
+      "name": "Sticky Note8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Knowledge Base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "text-embedding-004": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Fetch the Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gemini-2.5-flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "RAG Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "RAG Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Field VR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Field VR": {
+      "main": [
+        [
+          {
+            "node": "RAG Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch the Files": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3dcea87f-b2a3-4181-a368-b4c2ac18f733",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d139cc8817edbfe921ebb49cf470f37a38acccf02e4b0f7ecbfe97b65e3e56c"
+  },
+  "id": "m0n52e7tU6N5GTFd",
+  "tags": []
+}
