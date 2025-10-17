@@ -33,7 +33,7 @@ An automated storytelling pipeline built in **n8n** that generates **titles, sub
 ![Workflow Diagram](../Assets/Bedtime%20Stories%20Assets/Workflow%20Images/bedtime_story_sfx_lullaby_status_check.png?raw=true "Generate Subjects Workflow")
 
 ### Save Assets Status Check Webhook
-![Workflow Diagram](../Assets/Bedtime%20Stories%20Assets/Workflow%20Images/bedtime_save_assets_status_check.png?raw=true "Generate Subjects Workflow")
+![Workflow Diagram](../Assets/Bedtime%20Stories%20Assets/Workflow%20Images/bedtime_story_save_assets_status_check.png?raw=true "Generate Subjects Workflow")
 
 
 
