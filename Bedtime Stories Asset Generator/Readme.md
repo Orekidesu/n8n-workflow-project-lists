@@ -3,7 +3,7 @@
 
 # 🌙 Bedtime Story Generator
 
-An automated storytelling pipeline built in **n8n** that generates **titles, subjects, illustrations, narratives, sound effects, and lullabies** for children’s bedtime stories. Designed for scalability, creativity, and real-world multimedia production.
+An automated storytelling pipeline built in Lovable + n8n that generates titles, subjects, illustrations, narratives, sound effects, and lullabies for children’s bedtime stories. Designed for scalability, creativity, and real-world multimedia production.
 
 ---
 ## [📑 (Click To) View Website Screenshots](https://www.dropbox.com/scl/fi/0ncw2ab8kwx9osm39jd9m/BedTime-Story-Asset-Generator.pdf?rlkey=gc9r6sw6139wugubrodufn2nh&st=2wkszq4d&dl=0)
@@ -69,12 +69,12 @@ An automated storytelling pipeline built in **n8n** that generates **titles, sub
 ---
 
 ## 🛠️ Tech Stack
-
-- **n8n** – Workflow orchestration  
+- **Lovable + n8n** – Workflow orchestration and frontend integration  
 - **OpenAI / Gemini / Claude** – Text generation and orchestration  
-- ** Suno / ElevenLabs** – Audio generation (SFX + lullabies)  
+- **Suno / ElevenLabs** – Audio generation (SFX + lullabies)  
 - **Seedream** – Illustration/Image generation  
 - **Google Drive / Google Sheets / Google Docs** – Asset storage and logging  
+
 
 ---
 ---
