@@ -7,7 +7,7 @@ An automated content pipeline built in **n8n** that transforms a single Telegram
 <!-- Add your images below this line -->
 
 ### Telegram Trigger & Script Preparation  
-![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/telegram_trigger.png?raw=true "Telegram Trigger Workflow")  
+![Workflow Diagram](..Assets/AI%Influencer%Video%Generator/1.png?raw=true "Telegram Trigger Workflow")  
 
 ### Script Selection & Validation  
 ![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/script_selection.png?raw=true "Script Selection Workflow")  
