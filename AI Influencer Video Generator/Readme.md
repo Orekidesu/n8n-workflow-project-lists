@@ -2,27 +2,26 @@
 
 An automated content pipeline built in **n8n** that transforms a single Telegram message into a full week of influencer‑style short videos. From script generation to MP4 creation, captioning, and storage, this workflow is designed for scalability, reliability, and hands‑off social media production.  
 
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/bot.png?raw=true "Telegram Trigger Workflow")
 
 ## 📸 Workflow Overview  
 <!-- Add your images below this line -->
 
 ### Telegram Trigger & Script Preparation  
-![Workflow Diagram](..Assets/AI%Influencer%Video%Generator/1.png?raw=true "Telegram Trigger Workflow")  
-
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/1.png?raw=true "Telegram Trigger Workflow")
 ### Script Selection & Validation  
-![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/script_selection.png?raw=true "Script Selection Workflow")  
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/2.png?raw=true "Telegram Trigger Workflow")
 
 ### Image Fetching & Base64 Conversion  
-![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/image_fetching.png?raw=true "Image Fetching Workflow")  
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/3.png?raw=true "Telegram Trigger Workflow")
 
 ### Video Generation Sub‑Workflow  
-![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/video_generation.png?raw=true "Video Generation Workflow")  
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/4.png?raw=true "Telegram Trigger Workflow")
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/vid_gen.png?raw=true "Telegram Trigger Workflow")
 
 ### Save Videos to Google Drive & Update Sheet  
-![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/save_assets.png?raw=true "Save Assets Workflow")  
+![Workflow Diagram](../Assets/AI%20Influencer%20Video%20Generator/5.png?raw=true "Telegram Trigger Workflow")
 
-### Error Handling & Spam Protection  
-![Workflow Diagram](../Assets/AI%20Influencer%20Assets/Workflow%20Images/error_spam_protection.png?raw=true "Error Handling Workflow")  
 
 ---
 
