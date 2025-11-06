@@ -28,7 +28,6 @@ An intelligent appointment and patient management system built in **n8n**, desig
 ### 🔔 Doctor/Receptionist Notifications
 ![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_receptionist_daily_reminder.png)
 ![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_new_appointment_notification.png)
-![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_cancel_notification.png)
 
 
 ---
@@ -80,32 +79,30 @@ An intelligent appointment and patient management system built in **n8n**, desig
 ## 🧩 Feature Testing Documentation
 
 ### 🧍 User & Patient Management
-
-![Workflow Diagram](../Assets/BrightSmile/test_user_patient.png?raw=true "User & Patient Management Test")
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_user_patient.png)
 
 ### 📅 New Booking
-
-![Workflow Diagram](../Assets/BrightSmile/test_booking.png?raw=true "Booking Test")
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_new_booking.png)
 
 ### 🔁 Rescheduling
-
-![Workflow Diagram](../Assets/BrightSmile/test_reschedule.png?raw=true "Reschedule Test")
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_reschedule_booking.png)
 
 ### ❌ Cancel Appointment
-
-![Workflow Diagram](../Assets/BrightSmile/test_cancel.png?raw=true "Cancel Test")
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_cancel_booking.png)
 
 ### 🔍 My Upcoming Bookings
-
-![Workflow Diagram](../Assets/BrightSmile/test_upcoming.png?raw=true "Upcoming Booking Test")
-
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_upcoming_booking.png)
 ### 💬 Knowledge Base Queries
-
-![Workflow Diagram](../Assets/BrightSmile/test_rag.png?raw=true "RAG Query Test")
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_knowledge_base.png)
 
 ### 🔔 Notification & Reminder System
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_reminder_notification.png)
 
-![Workflow Diagram](../Assets/BrightSmile/test_reminders.png?raw=true "Reminders & Alerts Test")
+### 🧪 Test Logic Workflow
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_logic_workflow.png)
+
+###  User Experience
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_ux.png)
 
 ---
 
