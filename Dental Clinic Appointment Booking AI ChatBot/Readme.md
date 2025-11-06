@@ -5,41 +5,31 @@
 
 An intelligent appointment and patient management system built in **n8n**, designed for seamless clinic operations and patient engagement through **Telegram**. From booking and rescheduling to reminders and clinic Q&A, this automated workflow ensures reliability, accuracy, and human-like interaction — powered by AI orchestration and database synchronization.
 
-![Workflow Diagram](../Assets/BrightSmile/overview.png?raw=true "Clinic Workflow Overview")
-
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_main.png)
 ---
 
 ## 📸 Workflow Overview
 
 <!-- Add your screenshots below -->
 
-### 🏁 Telegram Entry & Main Menu
+### User And Patient Tools
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_user_patient_tool.png)
 
-![Workflow Diagram](../Assets/BrightSmile/1.png?raw=true "Telegram Entry")
+### Appointment Tools
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_appointment_tool.png)
 
-### 🧍 User Verification & Patient Setup
-
-![Workflow Diagram](../Assets/BrightSmile/2.png?raw=true "User and Patient Flow")
-
-### 📅 Booking & Calendar Scheduling
-
-![Workflow Diagram](../Assets/BrightSmile/3.png?raw=true "Booking Flow")
-
-### 🔁 Rescheduling & Cancellations
-
-![Workflow Diagram](../Assets/BrightSmile/4.png?raw=true "Rescheduling Flow")
-
-### 🔍 My Upcoming Bookings & Reminders
-
-![Workflow Diagram](../Assets/BrightSmile/5.png?raw=true "Upcoming Bookings")
+### 📅 Booking & Calendar Scheduling Tools
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_schedule_calendar_tool.png)
 
 ### 💬 Knowledge Base (RAG Agent)
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_knowledge_base_tool.png)
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_knowledge_base.png)
 
-![Workflow Diagram](../Assets/BrightSmile/6.png?raw=true "RAG Agent Responses")
+### 🔔 Doctor/Receptionist Notifications
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_receptionist_daily_reminder.png)
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_new_appointment_notification.png)
+![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_cancel_notification.png)
 
-### 🔔 Doctor & Receptionist Notifications
-
-![Workflow Diagram](../Assets/BrightSmile/7.png?raw=true "Notification System")
 
 ---
 
