@@ -82,6 +82,7 @@ An intelligent appointment and patient management system built in **n8n**, desig
 ![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_user_patient.png)
 
 ### 📅 New Booking
+# 🎥 [Watch Demo]([https://your.video.hosting/faq_demo.mp4](https://www.dropbox.com/scl/fi/qmwlcvwub9r7k93p18mcm/New-Booking.mp4?rlkey=lum859qkhsjczyoulkbzxzn29&st=4x91biqr&dl=0))
 ![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/test%20cases/test_new_booking.png)
 
 ### 🔁 Rescheduling
