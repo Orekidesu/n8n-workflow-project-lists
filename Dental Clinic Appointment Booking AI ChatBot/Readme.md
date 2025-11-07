@@ -8,6 +8,20 @@ An intelligent appointment and patient management system built in **n8n**, desig
 ![Workflow Diagram](https://github.com/Orekidesu/n8n-workflow-project-lists/raw/main/Assets/Dental%20Clinic%20Appointment%20Booking%20AI%20ChatBot/workflows/dental_appointment_booking_system_main.png)
 ---
 
+
+## 🎥 Demo Recordings
+To help you visualize the system in action, here are walkthrough recordings of each core feature. These demos showcase how users interact with the chatbot, how appointments are managed, and how notifications flow through the system — all powered by seamless automation and intelligent orchestration.
+
+🎥 [Watch Demo – New Booking](https://www.dropbox.com/scl/fi/qmwlcvwub9r7k93p18mcm/New-Booking.mp4?rlkey=lum859qkhsjczyoulkbzxzn29&st=4x91biqr&dl=0)
+
+🎥 [Watch Demo – Upcomming Booking](https://www.dropbox.com/scl/fi/9xm14ymqa4x19fhg5kuaf/Upcoming-Booking.mp4?rlkey=3a53xdgdjtw0qgrqudm5otkc7&st=c07nrke5&dl=0)
+
+🎥 [Watch Demo – Reschedule Booking](https://www.dropbox.com/scl/fi/ll7lbfy0afyqlfaduyxww/Reschedule-Booking.mp4?rlkey=qo7t30xlm8gam2ph3rv502tai&st=7a9qevks&dl=0)
+
+🎥 [Watch Demo – Cancel Booking](https://www.dropbox.com/scl/fi/i6wanyztupjqjexecvb7l/FAQ.mp4?rlkey=1wjb4v4cm35hljjkh2iiwjpie&st=st3fegsr&dl=0)
+
+🎥 [Watch Demo – Ask Question](https://www.dropbox.com/scl/fi/i6wanyztupjqjexecvb7l/FAQ.mp4?rlkey=1wjb4v4cm35hljjkh2iiwjpie&st=st3fegsr&dl=0)
+
 ## 📸 Workflow Overview
 
 <!-- Add your screenshots below -->
