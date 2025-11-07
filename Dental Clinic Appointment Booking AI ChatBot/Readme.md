@@ -18,7 +18,7 @@ To help you visualize the system in action, here are walkthrough recordings of e
 
 <a href="https://www.dropbox.com/scl/fi/ll7lbfy0afyqlfaduyxww/Reschedule-Booking.mp4?rlkey=qo7t30xlm8gam2ph3rv502tai&st=7a9qevks&dl=0" target="_blank">🎥 Watch Demo – Reschedule Booking</a>
 
-<a href="https://www.dropbox.com/scl/fi/i6wanyztupjqjexecvb7l/FAQ.mp4?rlkey=1wjb4v4cm35hljjkh2iiwjpie&st=st3fegsr&dl=0" target="_blank">🎥 Watch Demo – Cancel Booking</a>
+<a href="https://www.dropbox.com/scl/fi/h8hpu2m05rtqxymxnmzb2/Cancel-Booking.mp4?rlkey=mhpw8kfjz0uzu6fkrr6e1l8gm&st=ymszqgrk&dl=0" target="_blank">🎥 Watch Demo – Cancel Booking</a>
 
 <a href="https://www.dropbox.com/scl/fi/i6wanyztupjqjexecvb7l/FAQ.mp4?rlkey=1wjb4v4cm35hljjkh2iiwjpie&st=st3fegsr&dl=0" target="_blank">🎥 Watch Demo – Ask Question</a>
 
